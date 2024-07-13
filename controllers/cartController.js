@@ -28,6 +28,7 @@ const handleAddProductToCart = async (req, res) => {
     res.status(500).json({ status: false, message: error.message });
   }
 };
+
 const handleRemoveProductFromCart = async (req, res) => {
   const itemId = req.params.id;
   const userId = req.user.id;
@@ -43,6 +44,7 @@ const handleRemoveProductFromCart = async (req, res) => {
     res.status(500).json({ status: false, message: error.message });
   }
 };
+
 const handleFetchUserCart = async (req, res) => {
   const userId = req.user.id;
   try {
@@ -55,6 +57,7 @@ const handleFetchUserCart = async (req, res) => {
     res.status(500).json({ status: false, message: error.message });
   }
 };
+
 const handleClearUserCart = async (req, res) => {
   const userId = req.user.id;
   let count;
@@ -70,6 +73,7 @@ const handleClearUserCart = async (req, res) => {
     res.status(500).json({ status: false, message: error.message });
   }
 };
+
 const handleGetCartCount = async (req, res) => {
   const userId = req.user.id;
   try {
@@ -80,12 +84,13 @@ const handleGetCartCount = async (req, res) => {
     res.status(500).json({ status: false, message: error.message });
   }
 };
+
 const handleDecrementProductQuantity = async (req, res) => {
   const userId = req.user.id;
   const productId = req.body.productId;
   let count;
   try {
-    const cartItem = await Cart.find({ userId, productId });
+    const cartItem = await Cart.findOne({ userId, productId });
     if (!cartItem) {
       res.status(404).json({ message: "Cart item not found" });
     }
@@ -94,10 +99,10 @@ const handleDecrementProductQuantity = async (req, res) => {
       cartItem.quantity -= 1;
       cartItem.totalPrice -= productPrice;
       await cartItem.save();
-      res
+      return res
         .status(200)
         .json({ status: true, message: "Product quantity decreased" });
-    } else if (cartItem.quantity == 1) {
+    } else if (cartItem.quantity === 1) {
       await Cart.findByIdAndDelete({ userId: userId, productId: productId });
       count = await Cart.countDocuments({ userId });
       return res.status(200).json({ status: true, cartCount: count });

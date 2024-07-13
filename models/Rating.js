@@ -9,10 +9,12 @@ const ratingSchema = mongoose.Schema({
   ratingType: {
     type: String,
     required: true,
-    enum: [ "Food"],
+    enum: ["Food"],
+    default: "Food",
   },
   product: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Food",
     required: true,
   },
   rating: {

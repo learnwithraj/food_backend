@@ -1,8 +1,21 @@
 const Order = require("../models/Order");
 
 const handlePlaceOrder = async (req, res) => {
+  const order = new Order({
+    userId: req.user.id,
+    orderItems: req.body.orderItems,
+    orderTotal: req.body.orderTotal,
+    deliveryFee: req.body.deliveryFee,
+    grandTotal: req.body.grandTotal,
+    deliveryAddress: req.body.deliveryAddress,
+    orderStatus: req.body.orderStatus,
+    orderDate: req.body.orderDate,
+    rating: req.body.rating,
+    feedback: req.body.feedback,
+    discountAmount: req.body.discountAmount,
+  });
   try {
-    const order = new Order(req.body);
+   
     await order.save();
     res.status(201).json({ status: true, message: "Order saved Successfully" });
   } catch (error) {
@@ -19,9 +32,9 @@ const handleGetOrderDetails = async (req, res) => {
       })
       .populate({
         path: "deliveryAddress",
-        select: "addressLine1 city state postalCode",
+        select: "addressLine1 city province postalCode",
       });
-      
+
     if (order) {
       res.status(200).json(order);
     } else {

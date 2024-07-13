@@ -5,7 +5,7 @@ const handleCreateAddress = async (req, res) => {
     userId: req.user.id,
     addressLine1: req.body.addressLine1,
     city: req.body.city,
-    state: req.body.state,
+    province: req.body.province,
     district: req.body.district,
     postalCode: req.body.postalCode,
     country: req.body.country,
@@ -63,7 +63,7 @@ const handleUpdateAddress = async (req, res) => {
   const address = {
     addressLine1: req.body.addressLine1,
     city: req.body.city,
-    state: req.body.state,
+    province: req.body.province,
     district: req.body.district,
     postalCode: req.body.postalCode,
     country: req.body.country,

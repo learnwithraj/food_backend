@@ -1,5 +1,6 @@
 const Food = require("../models/Food");
 const Rating = require("../models/Rating");
+const mongoose = require("mongoose");
 
 const handleAddRating = async (req, res) => {
   const newRating = Rating({
@@ -11,20 +12,29 @@ const handleAddRating = async (req, res) => {
   try {
     await newRating.save();
     if (req.body.ratingType === "Food") {
-      const foods = await Rating.aggregrate([
+      const foods = await Rating.aggregate([
         {
           $match: {
             ratingType: req.body.ratingType,
-            product: req.body.product,
+            product: new mongoose.Types.ObjectId(req.body.product),
           },
         },
-        { $group: { _id: "$product" }, averageRating: { $avg: "$rating" } },
+        {
+          $group: {
+            _id: "$product",
+            averageRating: { $avg: "$rating" },
+            ratingCount: { $sum: 1 },
+          },
+        },
       ]);
       if (foods.length > 0) {
         const averageRating = foods[0].averageRating;
+        const ratingCount = foods[0].ratingCount;
+
+        // Update Food document with new average rating and increment ratingCount
         await Food.findByIdAndUpdate(
           req.body.product,
-          { rating: averageRating },
+          { rating: averageRating, ratingCount: ratingCount },
           { new: true }
         );
       }

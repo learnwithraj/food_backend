@@ -82,10 +82,29 @@ const handleUpdateCategoryImage = async (req, res) => {
   }
 };
 
+const handleGetRandomCategory = async (req, res) => {
+  try {
+    let foods = [];
+   
+      foods = await Category.aggregate([
+       
+        { $sample: { size: 10 } },
+        { $project: { __v: 0 } },
+      ]);
+   
+    if (foods.length) {
+      res.status(200).json(foods);
+    }
+  } catch (error) {
+    res.status(500).json({ status: false, messag: error.message });
+  }
+};
+
 module.exports = {
   handleCreateCategory,
   handleDeleteCategory,
   handleGetAllCategory,
   handleUpdateCategory,
   handleUpdateCategoryImage,
+  handleGetRandomCategory
 };

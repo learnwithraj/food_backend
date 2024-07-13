@@ -9,30 +9,26 @@ const {
   handleGetFoodById,
   handleGetRandomFoodByCategory,
   handleUpdateFood,
-  // handleGetRandomFoodByCategoryAndCode,
-  
   handleSearchFood,
   handleGetRandomFood,
   handleGetRandomFoodByCategoryAndCode,
-  // handleGetRandomFoodByCode,
+
 } = require("../controllers/foodController");
-const { verifyVendor } = require("../middleware/jwt");
+const { verifyAdmin } = require("../middleware/jwt");
 const router = express.Router();
 
-router.post("/", verifyVendor, handleAddFood);
-router.post("/tag/:id", verifyVendor, handleAddFoodTag);
-router.post("/type/:id", verifyVendor, handleAddFoodType);
-router.delete("/:id", verifyVendor, handleDeleteFood);
-router.patch("/:id", verifyVendor, handleFoodAvailability);
+router.post("/", verifyAdmin, handleAddFood);
+router.post("/tag/:id", verifyAdmin, handleAddFoodTag);
+router.post("/type/:id", verifyAdmin, handleAddFoodType);
+router.delete("/:id", verifyAdmin, handleDeleteFood);
+router.patch("/:id", verifyAdmin, handleFoodAvailability);
+router.put("/:id", verifyAdmin, handleUpdateFood);
 router.get("/", handleGetAllFood);
-router.get("/recommendation", handleGetRandomFood);
+router.get("/recommendation/:code", handleGetRandomFood);
 router.get("/:id", handleGetFoodById);
-router.get("/:category/:code", handleGetRandomFoodByCategory);
-router.get("/category/:category", handleGetRandomFoodByCategoryAndCode);
-router.put("/:id", verifyVendor, handleUpdateFood);
-
+router.get("/category/:category", handleGetRandomFoodByCategory);
 router.get("/search/:search", handleSearchFood);
-// router.get("/:code", handleGetRandomFoodByCode);
-// router.get("/:category/:code", handleGetRandomFoodByCategoryAndCode);
+router.get("/:category/:code", handleGetRandomFoodByCategoryAndCode);
+
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const Food = require("../models/Food");
+const mongoose = require("mongoose");
 
 const handleAddFood = async (req, res) => {
   const data = req.body;
@@ -119,25 +120,14 @@ const handleAddFoodType = async (req, res) => {
   }
 };
 const handleGetRandomFoodByCategory = async (req, res) => {
-  // const category = req.params.category;
-
-  // try {
-  //   let foods = await Food.aggregate([
-  //     { $match: { category: category } },
-  //     { $sample: { size: 5 } },
-  //   ]);
-  //   if (!foods || foods.length === 0) {
-  //     foods = await Food.aggregate([{ $sample: { size: 5 } }]);
-  //   }
-  //   res.status(200).json(foods);
-  // } catch (error) {
-  //   res.status(500).json({ status: false, messag: error.message });
-  // }
+  const { category } = req.params;
   try {
+    // Convert category to ObjectId
+    const categoryObjectId = new mongoose.Types.ObjectId(category);
     let foods = [];
-    if (req.params.category) {
+    if (category) {
       foods = await Food.aggregate([
-        { $match: { category: req.params.category } },
+        { $match: { category: categoryObjectId } },
         { $sample: { size: 5 } },
         { $project: { __v: 0 } },
       ]);
@@ -224,6 +214,7 @@ const handleGetRandomFood = async (req, res) => {
       res.status(404).json({ status: false, message: "No Food Found" });
     }
   } catch (error) {
+    console.log(error.message);
     res.status(500).json({ status: false, message: error.message });
   }
 };
@@ -232,21 +223,28 @@ const handleGetRandomFoodByCategoryAndCode = async (req, res) => {
   const { category, code } = req.params;
 
   try {
+    // Convert category to ObjectId
+    const categoryObjectId = new mongoose.Types.ObjectId(category);
+
     let foods = await Food.aggregate([
-      { $match: { category: category, code: code } },
+      { $match: { category: categoryObjectId, code: code } },
       { $sample: { size: 5 } },
     ]);
+
     if (!foods || foods.length === 0) {
       foods = await Food.aggregate([
         { $match: { code: code } },
         { $sample: { size: 5 } },
       ]);
-    } else {
+    }
+
+    if (!foods || foods.length === 0) {
       foods = await Food.aggregate([{ $sample: { size: 5 } }]);
     }
+
     res.status(200).json(foods);
   } catch (error) {
-    res.status(500).json({ status: false, messag: error.message });
+    res.status(500).json({ status: false, message: error.message });
   }
 };
 
@@ -260,7 +258,6 @@ module.exports = {
   handleGetFoodById,
   handleGetRandomFoodByCategory,
   handleUpdateFood,
- 
   handleSearchFood,
   handleGetRandomFood,
   handleGetRandomFoodByCategoryAndCode,

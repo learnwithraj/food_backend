@@ -7,7 +7,7 @@ const handleCreateUser = async (req, res) => {
 
   try {
     await admin.auth().getUserByEmail(user.email);
-    res.status(400).json({ message: "Email already registered" });
+    return res.status(400).json({ message: "Email already registered" });
   } catch (error) {
     if (error.code == "auth/user-not-found") {
       try {
@@ -32,13 +32,11 @@ const handleCreateUser = async (req, res) => {
           .status(201)
           .json({ status: true, message: "Account created successfully" });
       } catch (error) {
-        res
-          .status(500)
-          .json({
-            status: false,
-            message: "Error creating user",
-            error: error.message,
-          });
+        return res.status(500).json({
+          status: false,
+          message: "Error creating user",
+          error: error.message,
+        });
       }
     }
   }

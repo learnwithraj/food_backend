@@ -3,6 +3,7 @@ const {
   handleAddRating,
   handleCheckUserRating,
 } = require("../controllers/ratingController");
+const { verifyAndAuthorize } = require("./../middleware/jwt");
 
 const router = express.Router();
 
