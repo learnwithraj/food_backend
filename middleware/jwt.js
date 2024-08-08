@@ -17,8 +17,8 @@ const verifyToken = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (err) {
-    console.error(err);
-    res.status(401).json({ error: "Invalid token" });
+    // console.error(err);
+    return res.status(401).json({ error: "Invalid token" });
   }
 };
 
@@ -38,8 +38,6 @@ const verifyAndAuthorize = (req, res, next) => {
   });
 };
 
-
-
 const verifyAdmin = (req, res, next) => {
   verifyToken(req, res, () => {
     if (req.user.userType === "Admin") {
@@ -55,5 +53,4 @@ module.exports = {
   generateToken,
   verifyAndAuthorize,
   verifyAdmin,
-  
 };

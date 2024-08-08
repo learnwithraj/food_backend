@@ -42,11 +42,12 @@ const handleAddRating = async (req, res) => {
 
     res
       .status(200)
-      .json({ status: true, message: "Rating updated Successfully" });
+      .json({ status: true, message: "Rating added Successfully" });
   } catch (error) {
     res.status(500).json({ status: false, message: error.message });
   }
 };
+
 const handleCheckUserRating = async (req, res) => {
   const ratingType = req.query.ratingType;
   const product = req.query.product;
@@ -59,12 +60,12 @@ const handleCheckUserRating = async (req, res) => {
     });
 
     if (existingRating) {
-      res.status(200).json({
+     return res.status(200).json({
         status: true,
         message: "You have already rated this Food",
       });
     } else {
-      res
+     return res
         .status(200)
         .json({ status: false, message: "You have not rated this Food" });
     }

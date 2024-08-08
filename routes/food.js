@@ -4,15 +4,19 @@ const {
   handleAddFoodTag,
   handleAddFoodType,
   handleDeleteFood,
-  handleFoodAvailability,
-  handleGetAllFood,
-  handleGetFoodById,
-  handleGetRandomFoodByCategory,
   handleUpdateFood,
-  handleSearchFood,
+  handleFoodAvailability,
+  handleAllFoodAvailability,
+  handleGetFoodById,
   handleGetRandomFood,
-  handleGetRandomFoodByCategoryAndCode,
-
+  handleSearchFood,
+  handleGetAllFoods,
+  handleGetVegFoodsByCategory,
+  handleGetNonVegFoodsByCategory,
+  handleGetNewestFood,
+  handleGetAllFoodsByCategory,
+  handleGetBestRatedFoods,
+  // handleGetFoodsBySubcategory,
 } = require("../controllers/foodController");
 const { verifyAdmin } = require("../middleware/jwt");
 const router = express.Router();
@@ -21,14 +25,22 @@ router.post("/", verifyAdmin, handleAddFood);
 router.post("/tag/:id", verifyAdmin, handleAddFoodTag);
 router.post("/type/:id", verifyAdmin, handleAddFoodType);
 router.delete("/:id", verifyAdmin, handleDeleteFood);
-router.patch("/:id", verifyAdmin, handleFoodAvailability);
+router.patch("/available/:id", verifyAdmin, handleFoodAvailability);
+router.patch("/all/available/", verifyAdmin, handleAllFoodAvailability);
 router.put("/:id", verifyAdmin, handleUpdateFood);
-router.get("/", handleGetAllFood);
+
+router.get("/", handleGetAllFoods);
+
+router.get("/category/:categoryId/veg", handleGetVegFoodsByCategory);
+router.get("/category/:categoryId/non-veg", handleGetNonVegFoodsByCategory);
+router.get("/category/:categoryId/all", handleGetAllFoodsByCategory);
+
+router.get("/newest/", handleGetNewestFood);
 router.get("/recommendation/:code", handleGetRandomFood);
 router.get("/:id", handleGetFoodById);
-router.get("/category/:category", handleGetRandomFoodByCategory);
+router.get("/rating/best-rated/", handleGetBestRatedFoods);
 router.get("/search/:search", handleSearchFood);
-router.get("/:category/:code", handleGetRandomFoodByCategoryAndCode);
-
 
 module.exports = router;
+
+// router.get("/subcategory/:subcategory", handleGetFoodsBySubcategory);

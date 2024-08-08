@@ -9,6 +9,10 @@ const categorySchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  bestCategory: {
+    type: Boolean,
+    default: false,
+  },
   imageUrl: {
     type: String,
     required: true,

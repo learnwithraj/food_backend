@@ -35,7 +35,7 @@ const handleUpdateCategory = async (req, res) => {
   try {
     const category = await Category.findById(id);
     if (!category) {
-      res.status(404).json({ message: "Category not Found" });
+     return res.status(404).json({ message: "Category not Found" });
     }
     await Category.findByIdAndUpdate(id, {
       title: title,
@@ -59,21 +59,37 @@ const handleGetAllCategory = async (req, res) => {
   }
 };
 
+const handleGetBestCategory = async (req, res) => {
+  try {
+    const bestCategory = await Category.find(
+      { bestCategory: true },
+      { __v: 0 }
+    );
+    res.status(200).json(bestCategory);
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
 const handleUpdateCategoryImage = async (req, res) => {
   const id = req.params.id;
   try {
     const existingCategory = await Category.findById(id);
     if (!existingCategory) {
-      res.status(404).json({ message: "Category not Found" });
+      return res.status(404).json({ message: "Category not Found" });
     }
-    await Category.findByIdAndUpdate(id, {
-      title: existingCategory.title,
-      value: existingCategory.value,
-      imageUrl: req.body.imageUrl,
-    },{
-      new:true,
-      runValidators:true
-  });
+    await Category.findByIdAndUpdate(
+      id,
+      {
+        title: existingCategory.title,
+        value: existingCategory.value,
+        imageUrl: req.body.imageUrl,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     res
       .status(200)
       .json({ status: true, message: "Category Image updated succesfully" });
@@ -82,23 +98,22 @@ const handleUpdateCategoryImage = async (req, res) => {
   }
 };
 
-const handleGetRandomCategory = async (req, res) => {
-  try {
-    let foods = [];
-   
-      foods = await Category.aggregate([
-       
-        { $sample: { size: 10 } },
-        { $project: { __v: 0 } },
-      ]);
-   
-    if (foods.length) {
-      res.status(200).json(foods);
-    }
-  } catch (error) {
-    res.status(500).json({ status: false, messag: error.message });
-  }
-};
+// const handleGetRandomCategory = async (req, res) => {
+//   try {
+//     let categories = [];
+
+//     categories = await Category.aggregate([
+//       { $sample: { size: 10 } },
+//       { $project: { __v: 0 } },
+//     ]);
+
+//     if (categories.length) {
+//       res.status(200).json(categories);
+//     }
+//   } catch (error) {
+//     res.status(500).json({ status: false, messag: error.message });
+//   }
+// };
 
 module.exports = {
   handleCreateCategory,
@@ -106,5 +121,6 @@ module.exports = {
   handleGetAllCategory,
   handleUpdateCategory,
   handleUpdateCategoryImage,
-  handleGetRandomCategory
+  handleGetBestCategory,
+  // handleGetRandomCategory,
 };

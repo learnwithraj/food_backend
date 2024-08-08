@@ -1,18 +1,26 @@
 const Cart = require("../models/Cart");
 
+
+
 const handleAddProductToCart = async (req, res) => {
   const userId = req.user.id;
-  const { productId, totalPrice, quantity } = req.body;
-  let count;
+  const { productId, totalPrice, quantity = 1 } = req.body;
+
   try {
+    // Check if the product is already in the cart
     const existingProduct = await Cart.findOne({ userId, productId });
-    count = await Cart.countDocuments({ userId });
+
+    // Count the total number of products in the cart
+    const count = await Cart.countDocuments({ userId });
+
     if (existingProduct) {
-      existingProduct.quantity += 1;
-      existingProduct.totalPrice += totalPrice;
-      await existingProduct.save();
-      res.status(200).json({ status: true, count: count });
+     
+      return res
+        .status(400)
+        .json({ status: false, message: "Product already in cart" });
+    
     } else {
+    
       const newCart = new Cart({
         userId: userId,
         productId: productId,
@@ -21,8 +29,8 @@ const handleAddProductToCart = async (req, res) => {
         totalPrice: totalPrice,
       });
       await newCart.save();
-      count = await Cart.countDocuments({ userId });
-      res.status(200).json({ status: true, count: count });
+      const newCount = await Cart.countDocuments({ userId });
+      res.status(201).json({ status: true, cartCount: newCount });
     }
   } catch (error) {
     res.status(500).json({ status: false, message: error.message });
@@ -30,16 +38,13 @@ const handleAddProductToCart = async (req, res) => {
 };
 
 const handleRemoveProductFromCart = async (req, res) => {
-  const itemId = req.params.id;
+  const cartItemId = req.params.id;
   const userId = req.user.id;
   try {
-    const cartItem = await Cart.findById(itemId);
-    if (!cartItem) {
-      res.status(404).json({ message: "Cart item not found" });
-    }
-    await Cart.findByIdAndDelete(itemId);
-    count = await Cart.countDocuments({ userId });
-    res.status(200).json({ status: true, cartCount: count });
+    
+    await Cart.findByIdAndDelete({ _id: cartItemId });
+    const count = await Cart.countDocuments({ userId: userId });
+    res.status(200).json({ status: true, count: count });
   } catch (error) {
     res.status(500).json({ status: false, message: error.message });
   }
@@ -50,23 +55,37 @@ const handleFetchUserCart = async (req, res) => {
   try {
     const userCart = await Cart.find({ userId: userId }).populate({
       path: "productId",
-      select: "rating ratingCount",
+      select: "title price rating ratingCount imageUrl",
     });
-    res.status(200).json({ status: true, cart: userCart });
+    res.status(200).json(userCart);
   } catch (error) {
     res.status(500).json({ status: false, message: error.message });
   }
 };
 
+
 const handleClearUserCart = async (req, res) => {
   const userId = req.user.id;
-  let count;
+
   try {
+    // Check if there are items in the cart
+    const cartItems = await Cart.find({ userId: userId });
+
+    if (cartItems.length === 0) {
+      return res.status(404).json({
+        status: false,
+        message: "No items found in the cart",
+      });
+    }
+
+
     await Cart.deleteMany({ userId: userId });
-    count = await Cart.countDocuments({ userId });
+
+    const count = await Cart.countDocuments({ userId });
+
     res.status(200).json({
       status: true,
-      count: count,
+      cartCount: count,
       message: "Cart cleared successfully",
     });
   } catch (error) {
@@ -89,28 +108,86 @@ const handleDecrementProductQuantity = async (req, res) => {
   const userId = req.user.id;
   const productId = req.body.productId;
   let count;
+
   try {
-    const cartItem = await Cart.findOne({ userId, productId });
+    const cartItem = await Cart.findOne({ userId, productId }).populate(
+      "productId"
+    );
+
     if (!cartItem) {
-      res.status(404).json({ message: "Cart item not found" });
+      return res
+        .status(404)
+        .json({ status: false, message: "Cart item not found" });
     }
-    const productPrice = cartItem.totalPrice / cartItem.quantity;
+
+    const productPrice = cartItem.productId.price;
+
     if (cartItem.quantity > 1) {
       cartItem.quantity -= 1;
-      cartItem.totalPrice -= productPrice;
+      cartItem.totalPrice = cartItem.quantity * productPrice;
       await cartItem.save();
-      return res
-        .status(200)
-        .json({ status: true, message: "Product quantity decreased" });
-    } else if (cartItem.quantity === 1) {
-      await Cart.findByIdAndDelete({ userId: userId, productId: productId });
       count = await Cart.countDocuments({ userId });
-      return res.status(200).json({ status: true, cartCount: count });
+      return res.status(200).json({
+        status: true,
+        cartCount: count,
+        message: "Product quantity decreased",
+      });
+    } else if (cartItem.quantity == 1) {
+      return res
+        .status(400)
+        .json({ status: false, message: "Cannot decrease quantity below 1" });
     }
   } catch (error) {
     res.status(500).json({ status: false, message: error.message });
   }
 };
+
+
+const handleGetCartTotalPrice = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    // Fetch cart items with populated product details
+    const cartItems = await Cart.find({ userId }).populate("productId");
+
+    // Calculate the total price
+    const totalPrice = cartItems.reduce((acc, item) => {
+      return acc + item.quantity * item.productId.price;
+    }, 0);
+
+    res.status(200).json({ status: true, totalPrice: totalPrice });
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
+const handleIncrementCartItem = async (req, res) => {
+  const userId = req.user.id;
+  const { productId } = req.body;
+
+  try {
+    const cartItem = await Cart.findOne({ userId, productId }).populate(
+      "productId"
+    );
+
+    if (cartItem) {
+      cartItem.quantity += 1;
+      cartItem.totalPrice = cartItem.quantity * cartItem.productId.price; // Correctly calculate totalPrice
+      await cartItem.save();
+      res
+        .status(200)
+        .json({ status: true, message: "Item quantity increased." });
+    } else {
+      res
+        .status(404)
+        .json({ status: false, message: "Item not found in cart." });
+    }
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
+
 
 module.exports = {
   handleAddProductToCart,
@@ -119,4 +196,6 @@ module.exports = {
   handleFetchUserCart,
   handleGetCartCount,
   handleRemoveProductFromCart,
+  handleGetCartTotalPrice,
+  handleIncrementCartItem,
 };

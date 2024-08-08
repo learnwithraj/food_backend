@@ -13,6 +13,11 @@ const foodSchema = mongoose.Schema({
     type: Array,
     required: true,
   },
+  type: {
+    type: String,
+    enum: ["All", "Veg", "Non-veg"],
+    required: false,
+  },
   category: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
@@ -21,7 +26,6 @@ const foodSchema = mongoose.Schema({
   code: {
     type: String,
   },
- 
   isAvailable: {
     type: Boolean,
     required: true,
@@ -29,7 +33,7 @@ const foodSchema = mongoose.Schema({
   },
   rating: {
     type: Number,
-    min: 1,
+    min: 0,
     max: 5,
     default: 5,
   },
@@ -44,7 +48,6 @@ const foodSchema = mongoose.Schema({
     type: Number,
     required: true,
   },
-
   imageUrl: {
     type: Array,
     required: true,
@@ -52,6 +55,10 @@ const foodSchema = mongoose.Schema({
   time: {
     type: String,
   },
+  offers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Offer",
+  }],
 });
 
 const Food = mongoose.model("Food", foodSchema);

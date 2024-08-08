@@ -1,14 +1,16 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
+// const bodyParser = require("body-parser");
 const app = express();
 const PORT = process.env.PORT || 5000;
 require("dotenv").config();
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true }));
 
 var admin = require("firebase-admin");
-var serviceAccount = require("./serviceAccountKey.json");
+var serviceAccount = require("./serviceAccountKey_FoodApp.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
@@ -20,6 +22,8 @@ app.use("/api/users", userRoutes);
 
 const categoryRoutes = require("./routes/category");
 app.use("/api/category", categoryRoutes);
+const offerRoutes = require("./routes/offer");
+app.use("/api/offer", offerRoutes);
 const foodRoutes = require("./routes/food");
 app.use("/api/food", foodRoutes);
 const cartRoutes = require("./routes/cart");
@@ -30,6 +34,8 @@ const orderRoutes = require("./routes/order");
 app.use("/api/order", orderRoutes);
 const ratingRoutes = require("./routes/rating");
 app.use("/api/rating", ratingRoutes);
+const promoSliderRoutes = require("./routes/promoSlider");
+app.use("/api/slider", promoSliderRoutes);
 
 //connection of mongodb
 mongoose

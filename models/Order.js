@@ -5,9 +5,15 @@ const orderItemSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Food",
   },
+  title: {
+    type: String,
+    required: true,
+  },
   quantity: {
     type: Number,
     required: true,
+    min: 1,
+    default: 1,
   },
   price: {
     type: Number,
@@ -34,6 +40,7 @@ const orderSchema = mongoose.Schema({
   deliveryFee: {
     type: Number,
     required: true,
+    default: 100,
   },
   grandTotal: {
     type: Number,
@@ -42,6 +49,16 @@ const orderSchema = mongoose.Schema({
   deliveryAddress: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Address",
+  },
+  paymentMethod: {
+    enum: ["Esewa", "Khalti", "Cash On Delivery"],
+    type: String,
+    default: "Cash On Delivery",
+  },
+  paymentStatus: {
+    type: String,
+    enum: ["Completed", "Pending", "Cancelled"],
+    default: "Pending",
   },
   orderStatus: {
     type: String,

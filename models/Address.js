@@ -6,35 +6,36 @@ const addressSchema = mongoose.Schema({
     required: true,
     ref: "User",
   },
-  addressLine1: {
+
+  addressTitle: {
     type: String,
     required: true,
   },
-  city: {
+  location: {
     type: String,
     required: true,
   },
-  province: {
+  customerName: {
     type: String,
     required: true,
   },
-  district: {
+  phone: {
     type: String,
     required: true,
   },
-  postalCode: {
-    type: String,
+  latitude: {
+    type: Number,
     required: true,
   },
-  country: {
-    type: String,
+  longitude: {
+    type: Number,
     required: true,
   },
   deliveryInstructions: {
     type: String,
   },
   default: {
-    type: Boolean,
+    type: String,
     default: true,
   },
 });

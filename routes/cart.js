@@ -6,14 +6,18 @@ const {
   handleFetchUserCart,
   handleGetCartCount,
   handleRemoveProductFromCart,
+  handleGetCartTotalPrice,
+  handleIncrementCartItem,
 } = require("../controllers/cartController");
 const router = express.Router();
 const { verifyAndAuthorize } = require("../middleware/jwt");
 
 router.post("/", verifyAndAuthorize, handleAddProductToCart);
-router.post("/decrement/", verifyAndAuthorize, handleDecrementProductQuantity);
+router.post("/decrement", verifyAndAuthorize, handleDecrementProductQuantity);
+router.post("/increment", verifyAndAuthorize, handleIncrementCartItem);
 router.get("/", verifyAndAuthorize, handleFetchUserCart);
 router.get("/count", verifyAndAuthorize, handleGetCartCount);
+router.get("/total", verifyAndAuthorize, handleGetCartTotalPrice);
 router.delete("/clear", verifyAndAuthorize, handleClearUserCart);
 router.delete("/delete/:id", verifyAndAuthorize, handleRemoveProductFromCart);
 

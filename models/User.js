@@ -3,9 +3,13 @@ const bcrypt = require("bcrypt");
 
 const userSchema = mongoose.Schema(
   {
-    username: {
+    firstName: {
       type: String,
-      required: [true, "Username is required"],
+      required: [true, "Firstname is required"],
+    },
+    lastName: {
+      type: String,
+      required: [true, "Lastname is required"],
     },
     email: {
       type: String,
@@ -17,13 +21,18 @@ const userSchema = mongoose.Schema(
       required: true,
       unique: true,
     },
+    fcm: {
+      type: String,
+      required: false,
+      default: "none",
+    },
     password: {
       type: String,
       required: [true, "Password is required"],
     },
     address: {
-      type: Array,
-      required: false,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Address",
     },
     phone: {
       type: String,
@@ -31,17 +40,22 @@ const userSchema = mongoose.Schema(
       unique: true,
       match: [/^\d{10}$/, "Please enter a valid 10-digit phone number"],
     },
+    verification: {
+      type: Boolean,
+      default: false,
+    },
     userType: {
       type: String,
       required: [true, "Usertype is required"],
-      enum: [ "Admin", "Client"],
+      enum: ["Admin", "Client"],
       default: "Client",
     },
-    profile: {
-      type: String,
-      required: [true, "Profile is required"],
-      default: "https://www.flaticon.com/free-icon/user_149071",
-    },
+    // profile: {
+    //   type: String,
+    //   // required: true,
+    //   default:
+    //     "https://firebasestorage.googleapis.com/v0/b/food-app-429415.appspot.com/o/users%2Fuser-icon.png?alt=media&token=ebda2c0e-b153-486f-8eef-869a312ed237",
+    // },
   },
   { timestamps: true }
 );
@@ -49,17 +63,14 @@ const userSchema = mongoose.Schema(
 userSchema.pre("save", async function (next) {
   const user = this;
 
-  // Hash the password only if it has been modified (or is new)
   if (!user.isModified("password")) return next();
 
   try {
-    // hash password generation
     const salt = await bcrypt.genSalt(10);
 
     // hash password
     const hashedPassword = await bcrypt.hash(user.password, salt);
 
-    // Override the plain password with the hashed one
     user.password = hashedPassword;
     next();
   } catch (err) {
@@ -69,7 +80,6 @@ userSchema.pre("save", async function (next) {
 
 userSchema.methods.comparePassword = async function (enteredPassword) {
   try {
-    // Use bcrypt to compare the provided password with the hashed password
     const isMatch = await bcrypt.compare(enteredPassword, this.password);
     return isMatch;
   } catch (err) {

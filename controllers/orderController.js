@@ -8,6 +8,8 @@ const handlePlaceOrder = async (req, res) => {
     deliveryFee: req.body.deliveryFee,
     grandTotal: req.body.grandTotal,
     deliveryAddress: req.body.deliveryAddress,
+    paymentMethod: req.body.paymentMethod,
+    paymentStatus: req.body.paymentStatus,
     orderStatus: req.body.orderStatus,
     orderDate: req.body.orderDate,
     rating: req.body.rating,
@@ -15,7 +17,6 @@ const handlePlaceOrder = async (req, res) => {
     discountAmount: req.body.discountAmount,
   });
   try {
-   
     await order.save();
     res.status(201).json({ status: true, message: "Order saved Successfully" });
   } catch (error) {
@@ -32,7 +33,7 @@ const handleGetOrderDetails = async (req, res) => {
       })
       .populate({
         path: "deliveryAddress",
-        select: "addressLine1 city province postalCode",
+        select: "addressTitle location customerName phone latitude longitude",
       });
 
     if (order) {
@@ -47,7 +48,10 @@ const handleGetOrderDetails = async (req, res) => {
 const handleGetUserOrders = async (req, res) => {
   const userId = req.user.id;
   try {
-    const orders = await Order.find({ userId });
+    const orders = await Order.find({ userId }).populate({
+      path: "deliveryAddress",
+      select: "addressTitle location customerName phone latitude longitude",
+    });
     if (orders) {
       res.status(200).json(orders);
     } else {
