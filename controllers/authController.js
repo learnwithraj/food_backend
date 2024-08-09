@@ -6,20 +6,17 @@ const handleCreateUser = async (req, res) => {
   const user = req.body;
 
   try {
-   
     await admin.auth().getUserByEmail(user.email);
     return res
       .status(400)
       .json({ status: false, message: "Email already registered" });
   } catch (error) {
     if (error.code !== "auth/user-not-found") {
-    
       return res.status(500).json({
         status: false,
         message: "Failed to create user, Please try again",
       });
     }
-
 
     const existingUserWithPhone = await User.findOne({ phone: user.phone });
     if (existingUserWithPhone) {
@@ -28,7 +25,6 @@ const handleCreateUser = async (req, res) => {
         .json({ status: false, message: "Phone Number already exists" });
     }
 
-    
     let response;
     try {
       response = await admin.auth().createUser({
@@ -43,6 +39,7 @@ const handleCreateUser = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         phone: user.phone,
+        fcm: user.fcm,
         email: user.email,
         password: user.password,
         uid: response.uid,
@@ -55,15 +52,11 @@ const handleCreateUser = async (req, res) => {
         .status(201)
         .json({ status: true, message: "Account created successfully" });
     } catch (error) {
-      
       if (response && response.uid) {
         try {
           await admin.auth().deleteUser(response.uid);
         } catch (deleteError) {
-          console.error(
-            "Failed to delete Firebase user",
-            deleteError
-          );
+          console.error("Failed to delete Firebase user", deleteError);
         }
       }
 
@@ -75,30 +68,68 @@ const handleCreateUser = async (req, res) => {
   }
 };
 
+// const handleLoginuser = async (req, res) => {
+//   // const { email, password } = req.body;
+//   try {
+//     const user = await User.findOne(
+//       { email: req.body.email },
+//       { __v: 0, updatedAt: 0, createdAt: 0 }
+//     );
+//     if (!user || !(await user.comparePassword(req.body.password))) {
+//       return res
+//         .status(401)
+//         .json({ status: false, message: "Invalid email or password" });
+//     }
+//     const payload = {
+//       id: user._id,
+//       // email: user.email,
+//       uid: user.uid,
+//       userType: user.userType,
+//     };
+//     const userToken = generateToken(payload);
+//     const { password, ...others } = user._doc;
+
+//     res.status(200).json({ ...others, userToken });
+//   } catch (error) {
+//     res.status(500).json({ status: false, message: error.message });
+//   }
+// };
+
 const handleLoginuser = async (req, res) => {
-  // const { email, password } = req.body;
   try {
+    const { emailOrPhone, password } = req.body;
+
+    // Find user by either email or phone number
     const user = await User.findOne(
-      { email: req.body.email },
+      {
+        $or: [{ email: emailOrPhone }, { phone: emailOrPhone }],
+      },
       { __v: 0, updatedAt: 0, createdAt: 0 }
     );
-    if (!user || !(await user.comparePassword(req.body.password))) {
+
+    // If user is not found or password does not match, return an error
+    if (!user || !(await user.comparePassword(password))) {
       return res
         .status(401)
-        .json({ status: false, message: "Invalid email or password" });
+        .json({ status: false, message: "Invalid email/phone or password" });
     }
+
+    // Generate payload and token
     const payload = {
       id: user._id,
-      // email: user.email,
       uid: user.uid,
       userType: user.userType,
     };
     const userToken = generateToken(payload);
-    const { password, ...others } = user._doc;
 
+    // Exclude password from the user object before sending response
+    const { password: _, ...others } = user._doc;
+
+    // Send success response with user data and token
     res.status(200).json({ ...others, userToken });
   } catch (error) {
     res.status(500).json({ status: false, message: error.message });
   }
 };
+
 module.exports = { handleCreateUser, handleLoginuser };

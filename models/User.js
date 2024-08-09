@@ -23,8 +23,8 @@ const userSchema = mongoose.Schema(
     },
     fcm: {
       type: String,
-      required: false,
-      default: "none",
+      // required: false,
+      // default: "none",
     },
     password: {
       type: String,

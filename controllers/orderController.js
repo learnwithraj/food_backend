@@ -14,6 +14,7 @@ const handlePlaceOrder = async (req, res) => {
     orderDate: req.body.orderDate,
     rating: req.body.rating,
     feedback: req.body.feedback,
+    orderNote: req.body.orderNote,
     discountAmount: req.body.discountAmount,
   });
   try {

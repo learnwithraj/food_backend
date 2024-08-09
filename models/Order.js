@@ -85,6 +85,9 @@ const orderSchema = mongoose.Schema({
   feedback: {
     type: String,
   },
+  orderNote: {
+    type: String,
+  },
   discountAmount: {
     type: Number,
   },
