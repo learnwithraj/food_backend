@@ -6,11 +6,12 @@ const PORT = process.env.PORT || 5000;
 require("dotenv").config();
 // app.use(bodyParser.json());
 // app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.json()); 
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 var admin = require("firebase-admin");
 var serviceAccount = require("./serviceAccountKey_FoodApp.json");
+// const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT_KEY);
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
