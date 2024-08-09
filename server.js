@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 var admin = require("firebase-admin");
-var serviceAccount = require("./serviceAccountKey_FoodApp.json");
+// var serviceAccount = require("./serviceAccountKey_FoodApp.json");
 // const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT_KEY);
 var serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT_KEY);
 admin.initializeApp({
